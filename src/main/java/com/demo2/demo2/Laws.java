@@ -15,4 +15,19 @@ public Long id;
 public String name;
 
 public String discription;
+
+public String zone;
+
+Laws() {
+	
+}
+
+public Laws(String name, String discription, String zone) {
+	super();
+	this.name = name;
+	this.discription = discription;
+	this.zone = zone;
+}
+
+
 }

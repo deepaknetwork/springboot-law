@@ -7,11 +7,13 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,6 +40,20 @@ public class Cont {
 //	13.137608805299033, 78.1326162841144
 //	13.0449408   80.19968
 	// 11.1642969  76.9514709
+	
+	@Autowired
+	LasRepository l;
+	
+	@Autowired
+	RedisTemplate<String, String> r;
+	
+	@GetMapping("/law/{zone}")
+	String law(@PathVariable String zone) {
+
+		return r.opsForValue().get("a");
+				 
+	}
+	
 	@PostMapping("/zone")
 	String data(@RequestBody loc l) {
 		try {
@@ -82,10 +98,10 @@ public class Cont {
 String signup(@RequestBody UserDet ud) {
 	try
 	{
-		jj.createUser(User.withUsername(ud.name()).password(ud.password()).passwordEncoder(str->pe.encode(str)).roles("USER").build());	
-//		JdbcUserDetailsManager j=new JdbcUserDetailsManager(ds);
-//		var u1=User.withUsername(ud.name()).password(ud.password()).passwordEncoder(str->pe.encode(str)).roles("USER").build();
-//		j.createUser(u1);
+//		jj.createUser(User.withUsername(ud.name()).password(ud.password()).passwordEncoder(str->pe.encode(str)).roles("USER").build());	
+////		JdbcUserDetailsManager j=new JdbcUserDetailsManager(ds);
+////		var u1=User.withUsername(ud.name()).password(ud.password()).passwordEncoder(str->pe.encode(str)).roles("USER").build();
+////		j.createUser(u1);
 		return "signin successfull";
 	}catch(Exception e) {
 		return e.getMessage().toString();
