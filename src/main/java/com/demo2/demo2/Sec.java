@@ -81,19 +81,19 @@ public class Sec {
     @Bean
     public DataSource dataSource() {
         return DataSourceBuilder.create()	
-//        	.url("jdbc:postgresql://dpg-cnq8rkq1hbls738jng7g-a.oregon-postgres.render.com:5432/database_oa07")
-//        //  .url("jdbc:postgresql://dpg-cnq8rkq1hbls738jng7g-a/database_oa07")
-//        	.username("database_oa07_user")
-//            .password("cN5KILm1sR2qlV4pLAgLgOrNDZZ5ihnv")
-//            .driverClassName("org.postgresql.Driver")
-//            .build();
+        	//.url("jdbc:postgresql://dpg-cnq8rkq1hbls738jng7g-a.oregon-postgres.render.com:5432/database_oa07")
+          .url("jdbc:postgresql://dpg-cnq8rkq1hbls738jng7g-a/database_oa07")
+        	.username("database_oa07_user")
+            .password("cN5KILm1sR2qlV4pLAgLgOrNDZZ5ihnv")
+            .driverClassName("org.postgresql.Driver")
+            .build();
         		
-        		.url("jdbc:postgresql://localhost:5432/my_database")
-        
-                	.username("postgres")
-                    .password("Deepak@1")
-                    .driverClassName("org.postgresql.Driver")
-                    .build();
+//        		.url("jdbc:postgresql://localhost:5432/my_database")
+//        
+//                	.username("postgres")
+//                    .password("Deepak@1")
+//                    .driverClassName("org.postgresql.Driver")
+//                    .build();
     }
 
     
