@@ -124,7 +124,7 @@ public class Sec {
         
 //        config.setHostName("localhost"); //loc
 //        config.setPort(6379); //loc
-        
+//        
         return new LettuceConnectionFactory(config);
     }
     

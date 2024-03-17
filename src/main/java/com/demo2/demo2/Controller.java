@@ -50,6 +50,17 @@ public class Controller {
 		return "deleted";
 	}
 	
+	@DeleteMapping("/delete-all/{zone}")
+	String dltallcon(@PathVariable String zone) {
+		if(r.opsForValue().get(zone)!=null) {
+			r.delete(zone);
+			return "deleted";
+		}else
+		{
+			return "error on deletion";
+		}
+	}
+	
 	@PutMapping("/delete")
 	String dltone(@RequestBody Laws laws) {
 		List<Laws> la=r.opsForValue().get(laws.zone);
@@ -102,7 +113,7 @@ public class Controller {
 	}
 	
 	@PostMapping("/zone")
-	String data(@RequestBody loc l) {
+	List<Laws> data(@RequestBody loc l) {
 		try {
 			String aa=String.format("https://overpass-api.de/api/interpreter?data=[out:json];node(around:2000,%.15g,%.15g)[\"amenity\"];out;",l.lat(),l.lon());
 			String da=restTemplate.getForObject(aa,String.class);
@@ -124,12 +135,14 @@ public class Controller {
 		            }
 		        }
 			try {
-				return amenities.getFirst().toString();
+				System.out.println(amenities.getFirst().toString());
+				return r.opsForValue().get(amenities.getFirst().toString());
+//				return amenities.getFirst().toString();
 			}catch(Exception e) {
-				return "could not find";
+				return List.of();
 			}
 		}catch(Exception e) {
-			return e.getMessage().toString();
+			 return List.of();
 		}
 		
 		
