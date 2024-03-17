@@ -27,6 +27,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configurers.provisioning.InMemoryUserDetailsManagerConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.CacheControlConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -44,6 +45,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.http.CacheControl;
 
 @Configuration
 public class Sec {
@@ -56,7 +58,8 @@ public class Sec {
 			   .requestMatchers("/delete","/users","/user/{name}","/user","/deteleall","/add").hasAnyRole("ADMIN")
 			   .anyRequest().authenticated()
 			    );
-		http.httpBasic(withDefaults());
+		http.httpBasic();
+		http.headers(s->s.cacheControl(c->c.disable()));
 		http.csrf().disable();
 		http.sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		http.headers().frameOptions().sameOrigin();
@@ -71,7 +74,10 @@ public class Sec {
 				 .allowedMethods("*")
 				 .allowedOrigins("*");
 			}
+			 
+			
 		};
+		
 	}
 	
 
@@ -118,7 +124,7 @@ public class Sec {
         
 //        config.setHostName("localhost"); //loc
 //        config.setPort(6379); //loc
-//        
+        
         return new LettuceConnectionFactory(config);
     }
     

@@ -59,7 +59,7 @@ public class Controller {
 	}
 	
 	@PostMapping("/add")
-	String addall(@RequestBody Laws laws) {
+	String adda(@RequestBody Laws laws) {
 		if(r.opsForValue().get(laws.zone)!=null) {
 			Object value = r.opsForValue().get(laws.zone);
 		    if (value instanceof List) {
@@ -74,6 +74,30 @@ public class Controller {
 			r.opsForValue().set(laws.zone,List.of(laws));
 			return "added";
 		}
+		
+	}
+	@PostMapping("/add-all")
+	String addall(@RequestBody List<Laws> lawss) {
+		try {
+			for(Laws laws:lawss) {
+				if(r.opsForValue().get(laws.zone)!=null) {
+					Object value = r.opsForValue().get(laws.zone);
+				    if (value instanceof List) {
+				    	 List<Laws> la = new ArrayList<>((List<Laws>) value);
+				         la.add(laws);
+				         r.opsForValue().set(laws.zone, la);
+				    } else {
+				    }
+				}else {
+					r.opsForValue().set(laws.zone,List.of(laws));
+				}
+			}
+			return "added";
+			
+		}catch(Exception e) {
+			return e.getMessage();
+		}
+		
 		
 	}
 	
