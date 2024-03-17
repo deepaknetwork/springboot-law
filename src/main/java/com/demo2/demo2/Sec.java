@@ -2,6 +2,7 @@ package com.demo2.demo2;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -19,6 +20,8 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -36,6 +39,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
@@ -115,15 +122,51 @@ public class Sec {
         return new LettuceConnectionFactory(config);
     }
     
-    @Primary
+
+
+   
     @Bean
     public RedisTemplate<String, List<Laws>> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, List<Laws>> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
-      redisTemplate.setKeySerializer(new StringRedisSerializer());
-        // Add other serializers if needed for the value
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new ListLawsRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
+        redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }
+
+    private static class ListLawsRedisSerializer implements RedisSerializer<List<Laws>> {
+
+        private final ObjectMapper objectMapper;
+
+        public ListLawsRedisSerializer() {
+            this.objectMapper = new ObjectMapper();
+        }
+
+        @Override
+        public byte[] serialize(List<Laws> lawsList) throws SerializationException {
+            try {
+                return objectMapper.writeValueAsBytes(lawsList);
+            } catch (Exception ex) {
+                throw new SerializationException("Error serializing object", ex);
+            }
+        }
+
+        @Override
+        public List<Laws> deserialize(byte[] bytes) throws SerializationException {
+            if (bytes == null || bytes.length == 0) { // Check if the byte array is empty
+                return Collections.emptyList(); // Return an empty list
+            }
+            try {
+                return objectMapper.readValue(bytes, new TypeReference<List<Laws>>() {});
+            } catch (Exception ex) {
+                throw new SerializationException("Error deserializing object", ex);
+            }
+        }
+    }
+    
     @Bean
     public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();

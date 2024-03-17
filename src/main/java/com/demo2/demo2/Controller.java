@@ -40,12 +40,8 @@ public class Controller {
 	RedisTemplate<String, List<Laws>> r;
 	
 	@GetMapping("/all")
-	String laws() {
-		try {
-			return r.opsForValue().multiGet(r.keys("*")).toString();
-		}catch(Exception e) {
-			return e.getMessage();
-		}
+	List<List<Laws>> laws() {
+		return r.opsForValue().multiGet(r.keys("Schools"));
 				 
 	}
 	@DeleteMapping("/deleteall")
