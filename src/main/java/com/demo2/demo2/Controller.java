@@ -111,7 +111,16 @@ public class Controller {
 		
 		
 	}
-	
+	@GetMapping("/zone/{zone}")
+	List<Laws> datas(@PathVariable String zone){
+		if(r.opsForValue().get(zone)!=null) {
+			
+			return r.opsForValue().get(zone);
+		}else
+		{
+			return List.of();
+		}
+	}
 	@PostMapping("/zone")
 	List<Laws> data(@RequestBody loc l) {
 		try {
