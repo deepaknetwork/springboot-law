@@ -46,6 +46,7 @@ public class Sec {
 	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests((requests) -> requests
 			   .requestMatchers("/signup").permitAll()
+			   .requestMatchers("/delete","/users","/user/{name}","/user","/deteleall","/add").hasAnyRole("ADMIN")
 			   .anyRequest().authenticated()
 			    );
 		http.httpBasic(withDefaults());
@@ -81,8 +82,8 @@ public class Sec {
     @Bean
     public DataSource dataSource() {
         return DataSourceBuilder.create()	
-        	//.url("jdbc:postgresql://dpg-cnq8rkq1hbls738jng7g-a.oregon-postgres.render.com:5432/database_oa07")
-          .url("jdbc:postgresql://dpg-cnq8rkq1hbls738jng7g-a/database_oa07")
+//        	.url("jdbc:postgresql://dpg-cnq8rkq1hbls738jng7g-a.oregon-postgres.render.com:5432/database_oa07") //dev
+          .url("jdbc:postgresql://dpg-cnq8rkq1hbls738jng7g-a/database_oa07") //production
         	.username("database_oa07_user")
             .password("cN5KILm1sR2qlV4pLAgLgOrNDZZ5ihnv")
             .driverClassName("org.postgresql.Driver")
@@ -101,19 +102,23 @@ public class Sec {
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName("red-cnqiq56n7f5s7387nvfg");
-        config.setPort(6379);
-//        config.setUsername("red-cnqiq56n7f5s7387nvfg");
-//        config.setPassword("q7hnW6QCJcHmUVG3q8os3rnc25bR9mxy");
-        // You can customize other properties of the connection configuration here
-
+        config.setHostName("red-cnqiq56n7f5s7387nvfg"); //production
+        config.setPort(6379); //production   
+//        config.setHostName("oregon-redis.render.com"); //dev
+//        config.setPort(6379); //dev
+//        config.setUsername("red-cnqiq56n7f5s7387nvfg"); //dev
+//        config.setPassword("q7hnW6QCJcHmUVG3q8os3rnc25bR9mxy");//dev
+//        
+//        config.setHostName("localhost"); //loc
+//        config.setPort(6379); //loc
+//        
         return new LettuceConnectionFactory(config);
     }
     
     @Primary
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, List<Laws>> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, List<Laws>> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
       redisTemplate.setKeySerializer(new StringRedisSerializer());
         // Add other serializers if needed for the value
@@ -124,20 +129,14 @@ public class Sec {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(pe());
-        // You may need to set a PasswordEncoder if your UserDetailsService doesn't specify one
-        // provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
     
-    @Bean
-    public JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource) {
-        JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
-        return userDetailsManager;
-    }
 
     @Bean
-    public UserDetailsService userDetailsService(JdbcUserDetailsManager userDetailsManager) {
-        if (!userDetailsManager.userExists("deep")) {
+    public UserDetailsService userDetailsService(DataSource dataSource) {
+    	JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
+    	if (!userDetailsManager.userExists("deep")) {
             userDetailsManager.createUser(
                 User.withUsername("deep")
                     .password("dpk")
