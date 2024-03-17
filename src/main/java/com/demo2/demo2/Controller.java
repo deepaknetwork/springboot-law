@@ -2,12 +2,15 @@ package com.demo2.demo2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -39,17 +42,21 @@ public class Controller {
 	@Autowired
 	RedisTemplate<String, List<Laws>> r;
 	
+	
+	//Show all zone laws
 	@GetMapping("/all")
 	List<List<Laws>> laws() {
 		return r.opsForValue().multiGet(r.keys("*"));
-				 
 	}
+	
+	//Clears all zone laws
 	@DeleteMapping("/deleteall")
 	String dltall() {
 		r.delete(r.keys("*"));
 		return "deleted";
 	}
 	
+	//removes perticular zone fully
 	@DeleteMapping("/delete-all/{zone}")
 	String dltallcon(@PathVariable String zone) {
 		if(r.opsForValue().get(zone)!=null) {
@@ -61,6 +68,7 @@ public class Controller {
 		}
 	}
 	
+	//removes a perticular law
 	@PutMapping("/delete")
 	String dltone(@RequestBody Laws laws) {
 		List<Laws> la=r.opsForValue().get(laws.zone);
@@ -69,6 +77,7 @@ public class Controller {
 		return "deleted";
 	}
 	
+	//add single law
 	@PostMapping("/add")
 	String adda(@RequestBody Laws laws) {
 		if(r.opsForValue().get(laws.zone)!=null) {
@@ -87,6 +96,9 @@ public class Controller {
 		}
 		
 	}
+	
+	
+	//add a list of laws
 	@PostMapping("/add-all")
 	String addall(@RequestBody List<Laws> lawss) {
 		try {
@@ -111,6 +123,15 @@ public class Controller {
 		
 		
 	}
+	
+	
+	//show all zones 
+	@GetMapping("/zone")
+	Set<String> getzones() {
+		return r.keys("*");
+	}
+	
+	//show laws on perticular zone
 	@GetMapping("/zone/{zone}")
 	List<Laws> datas(@PathVariable String zone){
 		if(r.opsForValue().get(zone)!=null) {
@@ -121,6 +142,25 @@ public class Controller {
 			return List.of();
 		}
 	}
+	
+	//change zone
+	@PutMapping("/zone/{oldz}/{newz}")
+	String changezone(@PathVariable String oldz,@PathVariable String newz) {
+		if(r.opsForValue().get(oldz)!=null) {
+			List<Laws> lawso=r.opsForValue().get(oldz);
+			List<Laws> lawsn =new ArrayList<>();
+			for(Laws law:lawso) {
+				lawsn.add(new Laws(law.id,law.name,law.description,newz));
+			}
+			r.delete(oldz);
+			r.opsForValue().set(newz, lawsn);
+			return "changed";
+		}else {
+			return "error on changing";
+		}
+	}
+	
+	//find the zone and show law
 	@PostMapping("/zone")
 	List<Laws> data(@RequestBody loc l) {
 		try {
@@ -144,9 +184,7 @@ public class Controller {
 		            }
 		        }
 			try {
-				System.out.println(amenities.getFirst().toString());
 				return r.opsForValue().get(amenities.getFirst().toString());
-//				return amenities.getFirst().toString();
 			}catch(Exception e) {
 				return List.of();
 			}
@@ -157,7 +195,9 @@ public class Controller {
 		
 	}
 	
-@PostMapping("/user")
+	
+	//add new user
+@PostMapping("/signup")
 String signup(@RequestBody UserDet ud) {
 	try
 	{
@@ -172,6 +212,17 @@ String signup(@RequestBody UserDet ud) {
 		return e.getMessage().toString();
 	}
 }
+
+
+//show the roll
+@GetMapping("/login")
+String login() {
+	 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	 return authentication.getAuthorities().iterator().next().getAuthority();
+    
+}
+
+//delete a user with name
 @DeleteMapping("/user/{name}")
 String deleteuser(@PathVariable String name) {
 	
@@ -189,6 +240,8 @@ String deleteuser(@PathVariable String name) {
 	}
 }
 
+
+//delete all users
 @DeleteMapping("/users")
 String deletealluser() {
 	try
@@ -208,6 +261,8 @@ String deletealluser() {
 	}
 }
 
+
+//show all users
 @GetMapping("/user")
 List<String> alluser() {
 	

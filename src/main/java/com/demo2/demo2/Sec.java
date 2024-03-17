@@ -55,7 +55,7 @@ public class Sec {
 	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests((requests) -> requests
 			   .requestMatchers("/signup").permitAll()
-			   .requestMatchers("/delete","/users","/user/{name}","/user","/deteleall","/add").hasAnyRole("ADMIN")
+			   .requestMatchers("/deteleall","/delete-all/{zone}","/delete","/add","/add-all","/zone/{oldz}/{newz}","/users","/user/{name}","/user").hasAnyRole("ADMIN")
 			   .anyRequest().authenticated()
 			    );
 		http.httpBasic();

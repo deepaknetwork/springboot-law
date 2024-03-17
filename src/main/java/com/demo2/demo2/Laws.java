@@ -23,8 +23,9 @@ Laws() {
 	
 }
 
-public Laws(String name, String description, String zone) {
+public Laws(String id,String name, String description, String zone) {
 	super();
+	this.id=id;
 	this.name = name;
 	this.description = description;
 	this.zone = zone;
