@@ -41,7 +41,7 @@ public class Controller {
 	
 	@GetMapping("/all")
 	List<List<Laws>> laws() {
-		return r.opsForValue().multiGet(r.keys("Schools"));
+		return r.opsForValue().multiGet(r.keys("*"));
 				 
 	}
 	@DeleteMapping("/deleteall")
